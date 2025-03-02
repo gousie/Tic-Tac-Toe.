@@ -1,0 +1,157 @@
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import colorchooser
+
+class TicTacToeGUI:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("RVIT Tic-Tac-Toe Setup")
+
+        label_title = tk.Label(self.root, text="Welcome to RVIT Tic-Tac-Toe Game!", font=('Arial', 20))
+        label_title.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+
+        label_grid = tk.Label(self.root, text="Choose Grid Size:")
+        label_grid.grid(row=1, column=0, padx=10, pady=10)
+
+        self.grid_choice = tk.StringVar(value="3x3")
+        dropdown_grid = tk.OptionMenu(self.root, self.grid_choice, "3x3", "4x4")
+        dropdown_grid.grid(row=1, column=1, padx=10, pady=10)
+
+        self.player1 = tk.StringVar()
+        self.player2 = tk.StringVar()
+        self.symbol1 = tk.StringVar(value="X")
+        self.symbol2 = tk.StringVar(value="O")
+
+        label_player1 = tk.Label(self.root, text="Player 1 Name:")
+        label_player1.grid(row=2, column=0, padx=10, pady=10)
+        entry_player1 = tk.Entry(self.root, textvariable=self.player1)
+        entry_player1.grid(row=2, column=1, padx=10, pady=10)
+
+        label_player2 = tk.Label(self.root, text="Player 2 Name:")
+        label_player2.grid(row=3, column=0, padx=10, pady=10)
+        entry_player2 = tk.Entry(self.root, textvariable=self.player2)
+        entry_player2.grid(row=3, column=1, padx=10, pady=10)
+
+        label_symbol1 = tk.Label(self.root, text="Player 1 Symbol:")
+        label_symbol1.grid(row=4, column=0, padx=10, pady=10)
+        entry_symbol1 = tk.Entry(self.root, textvariable=self.symbol1)
+        entry_symbol1.grid(row=4, column=1, padx=10, pady=10)
+
+        label_symbol2 = tk.Label(self.root, text="Player 2 Symbol:")
+        label_symbol2.grid(row=5, column=0, padx=10, pady=10)
+        entry_symbol2 = tk.Entry(self.root, textvariable=self.symbol2)
+        entry_symbol2.grid(row=5, column=1, padx=10, pady=10)
+
+        label_color1 = tk.Label(self.root, text="Choose color for X:")
+        label_color1.grid(row=6, column=0, padx=10, pady=10)
+        self.color1 = tk.StringVar(value="red")  # Default color
+        button_color1 = tk.Button(self.root, text="Choose", command=self.choose_color1)
+        button_color1.grid(row=6, column=1, padx=10, pady=10)
+
+        label_color2 = tk.Label(self.root, text="Choose color for O:")
+        label_color2.grid(row=7, column=0, padx=10, pady=10)
+        self.color2 = tk.StringVar(value="blue")  # Default color
+        button_color2 = tk.Button(self.root, text="Choose", command=self.choose_color2)
+        button_color2.grid(row=7, column=1, padx=10, pady=10)
+
+        button_start_game = tk.Button(self.root, text="Start Game", command=self.start_game)
+        button_start_game.grid(row=8, column=0, columnspan=2, padx=10, pady=10)
+
+        self.root.mainloop()
+
+    def choose_color1(self):
+        color = colorchooser.askcolor(title="Choose color for X")
+        if color[1]:
+            self.color1.set(color[1])
+
+    def choose_color2(self):
+        color = colorchooser.askcolor(title="Choose color for O")
+        if color[1]:
+            self.color2.set(color[1])
+
+    def start_game(self):
+        grid_choice = self.grid_choice.get()
+        player1_name = self.player1.get()
+        player2_name = self.player2.get()
+        player1_symbol = self.symbol1.get()
+        player2_symbol = self.symbol2.get()
+        color1 = self.color1.get()
+        color2 = self.color2.get()
+
+        if player1_name.strip() == "" or player2_name.strip() == "":
+            messagebox.showerror("Error", "Please enter names for both players.")
+        elif player1_symbol.strip() == "" or player2_symbol.strip() == "":
+            messagebox.showerror("Error", "Please enter symbols for both players.")
+        elif player1_symbol == player2_symbol:
+            messagebox.showerror("Error", "Both players cannot choose the same symbol.")
+        else:
+            self.root.destroy()
+            self.run_game(grid_choice, player1_name, player2_name, player1_symbol, player2_symbol, color1, color2)
+
+    def run_game(self, grid_choice, player1_name, player2_name, player1_symbol, player2_symbol, color1, color2):
+        self.game_root = tk.Tk()
+        self.game_root.title("RVIT Tic-Tac-Toe")
+
+        self.player1_name = player1_name
+        self.player2_name = player2_name
+        self.current_player = player1_name
+        self.current_symbol = player1_symbol
+        self.grid_size = int(grid_choice.split('x')[0])
+        self.board = [[' ' for _ in range(self.grid_size)] for _ in range(self.grid_size)]
+
+        self.label_player1 = tk.Label(self.game_root, text=f"{player1_name} ({player1_symbol})", font=('Arial', 16))
+        self.label_player1.grid(row=0, column=0, padx=10, pady=10)
+        self.label_player2 = tk.Label(self.game_root, text=f"{player2_name} ({player2_symbol})", font=('Arial', 16))
+        self.label_player2.grid(row=0, column=1, padx=10, pady=10)
+
+        self.buttons = [[None for _ in range(self.grid_size)] for _ in range(self.grid_size)]
+        for i in range(self.grid_size):
+            for j in range(self.grid_size):
+                self.buttons[i][j] = tk.Button(self.game_root, text='', font=('Arial', 24), width=8, height=4,
+                                                command=lambda row=i, col=j: self.make_move(row, col))
+                self.buttons[i][j].grid(row=i+1, column=j, padx=5, pady=5)
+                self.buttons[i][j].config(bg='yellow')  # Set background color to yellow
+
+    def make_move(self, row, col):
+        if self.board[row][col] == ' ':
+            self.board[row][col] = self.current_symbol
+            self.buttons[row][col].config(text=self.current_symbol)
+            self.buttons[row][col].config(fg=self.color1.get() if self.current_symbol == self.symbol1.get() else self.color2.get())
+            if self.check_winner():
+                messagebox.showinfo("Winner", f"{self.current_player} wins!")
+                self.reset_game()
+            elif self.is_board_full():
+                messagebox.showinfo("Draw", "It's a draw!")
+                self.reset_game()
+            else:
+                self.current_player = self.player2_name if self.current_player == self.player1_name else self.player1_name
+                self.current_symbol = self.symbol2.get() if self.current_symbol == self.symbol1.get() else self.symbol1.get()
+                self.update_title()
+        else:
+            messagebox.showerror("No Cheating", "You can't click the same box more than once!")
+
+    def check_winner(self):
+        # Check rows and columns
+        for i in range(self.grid_size):
+            if all(self.board[i][j] == self.current_symbol for j in range(self.grid_size)) or \
+               all(self.board[j][i] == self.current_symbol for j in range(self.grid_size)):
+                return True
+        # Check diagonals
+        if all(self.board[i][i] == self.current_symbol for i in range(self.grid_size)) or \
+           all(self.board[i][self.grid_size - i - 1] == self.current_symbol for i in range(self.grid_size)):
+            return True
+        return False
+
+    def is_board_full(self):
+        for row in self.board:
+            for cell in row:
+                if cell == ' ':
+                    return False
+        return True
+
+    def reset_game(self):
+        self.game_root.destroy()
+        self.__init__()
+
+# Run the game setup
+game_setup = TicTacToeGUI()
